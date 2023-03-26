@@ -2,7 +2,8 @@
 const models = require('../models');
 
 // get the Cat model
-const { Cat } = models;
+const { Cat, Dog } = models;
+
 
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
@@ -81,6 +82,17 @@ const hostPage2 = (req, res) => {
 // Function to render the untemplated page3.
 const hostPage3 = (req, res) => {
   res.render('page3');
+};
+
+// Function to render the page4 template
+const hostPage4 = async (req, res) => {
+  try {
+    const docs = await Dog.find({}).lean().exec();
+    return res.render('page4', { dogs: docs });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Failed to find dogs' });
+  }
 };
 
 // Get name will return the name of the last added cat.
@@ -234,6 +246,72 @@ const updateLast = (req, res) => {
   });
 };
 
+// Create New Dog
+const createDog = async (req, res) => {
+  // Check if the elements are present
+  if (!req.body.firstName || !req.body.lastName || !req.body.breed || !req.body.age){
+    return res.status(400).json({ error: "Missing Elements of Dog Profile."});
+  }
+
+  // Creates the Dats data
+  const dogData = {
+    name: `${req.body.firstName} ${req.body.lastName}`,
+    breed: `${req.body.breed}`,
+    age: req.body.age,
+  };
+
+  // Creates a new Model of the data
+  const newDog = new Dog(dogData);
+
+  // Tries to save the new Dog data
+  try {
+    await newDog.save();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Failed to create cat' });
+  }
+
+  // Returns the saved dog as JSON
+  return res.json({
+    data: dogData,
+  });
+}
+
+// Function for Finding a Dog
+const findDog = async (req, res) => {
+  // Checks that a name came into the game
+  if (!req.body.name) {
+    return res.status(400).json({ error: 'Name must be provided'});
+  }
+
+  let doc;
+
+  // Trys to find the dog
+  try {
+    doc = await Dog.findOne({ name: req.body.name }).exec();
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: 'Error Within Database'});
+  }
+
+  // Returns an error code if no Dog Found
+  if (!doc){
+    return res.json({ error: 'No Dog found' });
+  }
+
+  // Increments the Dog's Age
+  doc.age = doc.age + 1;
+
+  // Saves the Dog
+  try {
+    doc.save();
+    res.json({ content: doc });
+  } catch (err) {
+    console.log(error);
+    res.status(500).json({ error: 'Database Error' });
+  }
+};
+
 // A function to send back the 404 page.
 const notFound = (req, res) => {
   res.status(404).render('notFound', {
@@ -247,9 +325,12 @@ module.exports = {
   page1: hostPage1,
   page2: hostPage2,
   page3: hostPage3,
+  page4: hostPage4,
   getName,
   setName,
   updateLast,
   searchName,
+  createDog,
+  findDog,
   notFound,
 };
