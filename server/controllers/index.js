@@ -307,8 +307,8 @@ const findDog = async (req, res) => {
     doc.save();
     res.json({ content: doc });
   } catch (err) {
-    console.log(error);
-    res.status(500).json({ error: 'Database Error' });
+    console.log(err);
+    return res.status(500).json({ error: 'Database Error' });
   }
 };
 
