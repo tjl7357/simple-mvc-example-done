@@ -4,7 +4,6 @@ const models = require('../models');
 // get the Cat model
 const { Cat, Dog } = models;
 
-
 // default fake data so that we have something to work with until we make a real Cat
 const defaultData = {
   name: 'unknown',
@@ -249,8 +248,8 @@ const updateLast = (req, res) => {
 // Create New Dog
 const createDog = async (req, res) => {
   // Check if the elements are present
-  if (!req.body.firstName || !req.body.lastName || !req.body.breed || !req.body.age){
-    return res.status(400).json({ error: "Missing Elements of Dog Profile."});
+  if (!req.body.firstName || !req.body.lastName || !req.body.breed || !req.body.age) {
+    return res.status(400).json({ error: 'Missing Elements of Dog Profile.' });
   }
 
   // Creates the Dats data
@@ -275,13 +274,13 @@ const createDog = async (req, res) => {
   return res.json({
     data: dogData,
   });
-}
+};
 
 // Function for Finding a Dog
 const findDog = async (req, res) => {
   // Checks that a name came into the game
   if (!req.body.name) {
-    return res.status(400).json({ error: 'Name must be provided'});
+    return res.status(400).json({ error: 'Name must be provided' });
   }
 
   let doc;
@@ -291,21 +290,21 @@ const findDog = async (req, res) => {
     doc = await Dog.findOne({ name: req.body.name }).exec();
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ error: 'Error Within Database'});
+    return res.status(500).json({ error: 'Error Within Database' });
   }
 
   // Returns an error code if no Dog Found
-  if (!doc){
+  if (!doc) {
     return res.json({ error: 'No Dog found' });
   }
 
   // Increments the Dog's Age
-  doc.age = doc.age + 1;
+  doc.age += 1;
 
   // Saves the Dog
   try {
     doc.save();
-    res.json({ content: doc });
+    return res.json({ content: doc });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ error: 'Database Error' });
